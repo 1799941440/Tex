@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroller"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@id/guideline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/add"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginVertical="5dp"
+                android:background="@drawable/shape_ffa000_c6"
+                android:gravity="center"
+                android:text="新增按钮"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/delete"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginVertical="5dp"
+                android:background="@drawable/shape_ffa000_c6"
+                android:gravity="center"
+                android:text="删除按钮"
+                android:textColor="@color/white"
+                app:layout_constraintEnd_toEndOf="@id/guideline"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/add" />
+
+            <TextView
+                android:id="@+id/selectBg"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginVertical="5dp"
+                android:background="@drawable/shape_ffa000_c6"
+                android:gravity="center"
+                android:text="选择背景"
+                android:textColor="@color/white"
+                app:layout_constraintEnd_toEndOf="@id/guideline"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/delete" />
+
+            <TextView
+                android:id="@+id/deleteAll"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginVertical="5dp"
+                android:background="@drawable/shape_ffa000_c6"
+                android:gravity="center"
+                android:text="删除全部"
+                android:textColor="@color/white"
+                app:layout_constraintEnd_toEndOf="@id/guideline"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/selectBg" />
+
+            <TextView
+                android:id="@+id/save"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginVertical="5dp"
+                android:background="@drawable/shape_ffa000_c6"
+                android:gravity="center"
+                android:text="保存"
+                android:textColor="@color/white"
+                app:layout_constraintEnd_toEndOf="@id/guideline"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/deleteAll" />
+
+            <TextView
+                android:id="@+id/exit"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginVertical="5dp"
+                android:background="@drawable/shape_ffa000_c6"
+                android:gravity="center"
+                android:text="退出"
+                android:textColor="@color/white"
+                app:layout_constraintEnd_toEndOf="@id/guideline"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/save" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </androidx.core.widget.NestedScrollView>
+
+    <TextView
+        android:id="@+id/attrs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:background="@drawable/shape_f8c6b5_c12"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="6dp"
+        android:textColor="#5c4f55"
+        app:layout_constraintBottom_toTopOf="@id/panel"
+        app:layout_constraintStart_toEndOf="@id/scroller"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="按钮属性:  左边距=16.52%, 上边距=92.58%" />
+
+    <LinearLayout
+        android:id="@+id/setWH"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:background="@drawable/shape_5c4f55_c12"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="6dp"
+        app:layout_constraintBottom_toTopOf="@id/panel"
+        app:layout_constraintStart_toEndOf="@id/attrs"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="当前宽高="
+            android:textColor="#f8c6b5" />
+
+        <EditText
+            android:id="@+id/etWidthHeight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:text="102"
+            android:textColor="#f8c6b5"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="，设置宽高："
+            android:textColor="#f8c6b5" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:text="-10"
+            android:textColor="#f8c6b5" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:text="-5"
+            android:textColor="#f8c6b5" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:text="-1"
+            android:textColor="#f8c6b5" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:text="+1"
+            android:textColor="#f8c6b5" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:text="+5"
+            android:textColor="#f8c6b5" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:text="+10"
+            android:textColor="#f8c6b5" />
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.1" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/panel"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#cccccc"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="731:411"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/guideline">
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

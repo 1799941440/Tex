@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/send"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="选择端类型"
+        android:textColor="#333333"
+        android:textSize="18sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/server"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_marginHorizontal="12dp"
+        android:background="@drawable/shape_5c4f55_c12"
+        android:gravity="center"
+        android:text="主控端"
+        android:textColor="#f8c6b5"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/client"
+        app:layout_constraintTop_toBottomOf="@id/send" />
+
+    <TextView
+        android:id="@+id/client"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_marginHorizontal="12dp"
+        android:background="@drawable/shape_f8c6b5_c12"
+        android:gravity="center"
+        android:text="受控端"
+        android:textColor="#5c4f55"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/lastConfig"
+        app:layout_constraintTop_toBottomOf="@id/server" />
+
+    <TextView
+        android:id="@+id/lastConfig"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_marginHorizontal="12dp"
+        android:background="@drawable/shape_ffa000_c12"
+        android:gravity="center"
+        android:text="上次配置一键启动\n受控端(192.168.8.92:55555)"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/client" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
