@@ -58,8 +58,8 @@ public final class ServiceManager {
     public InputManager getInputManager() {
         if (inputManager == null) {
             try {
-                Method getInstanceMethod = InputManager.class.getDeclaredMethod("getInstance");
-                InputManager im = (InputManager) getInstanceMethod.invoke(null);
+                Method getInstanceMethod = android.hardware.input.InputManager.class.getDeclaredMethod("getInstance");
+                android.hardware.input.InputManager im = (android.hardware.input.InputManager) getInstanceMethod.invoke(null);
                 inputManager = new InputManager(im);
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                 throw new AssertionError(e);

@@ -35,7 +35,7 @@ data class Msg(
         fun generateAnswer(ask: String?): Msg {
             return Msg().apply {
                 socketAction = "answer"
-                msg = "answer for '$ask'"
+                msg = "answer for: $ask"
             }
         }
     }
