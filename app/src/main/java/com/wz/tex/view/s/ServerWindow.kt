@@ -12,11 +12,14 @@ import android.util.Log
 import android.view.*
 import android.view.MotionEvent.PointerCoords
 import android.view.MotionEvent.PointerProperties
+import com.google.gson.Gson
 import com.wz.tex.Device
 import com.wz.tex.R
+import com.wz.tex.bean.Msg
 import com.wz.tex.bean.Point
 import android.graphics.Point as SPoint
 import com.wz.tex.bean.PointersState
+import com.wz.tex.view.SocketEvents
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -36,6 +39,7 @@ class ServerWindow : Service() {
     var mPort = 55555
 //    var mUdpSocket: DatagramSocket? = null
     private lateinit var sSocket: Socket
+    private val gson by lazy { Gson() }
     private var pw: PrintWriter? = null
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -66,7 +70,7 @@ class ServerWindow : Service() {
             try {
                 sSocket = Socket(ip, mPort)
                 pw = PrintWriter(sSocket.getOutputStream())
-                ServerReceive(BufferedReader(InputStreamReader(sSocket.getInputStream()))).start()
+                ServerReceive(BufferedReader(InputStreamReader(sSocket.getInputStream())), this).start()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -82,13 +86,12 @@ class ServerWindow : Service() {
 //        )
         MainScope().launch(Dispatchers.IO) {
             try {
-                Log.i("TAG_TIME", "before send: ${System.currentTimeMillis()}")
                 if (::sSocket.isInitialized) {
                     pw?.println(strToSend)
                     pw?.flush()
                 }
+                Log.i("TAG_TIME", "send-sent: $strToSend}")
 //                mUdpSocket?.send(datagramPacketToSend)
-                Log.i("TAG_TIME", "after send: ${System.currentTimeMillis()}")
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -130,6 +133,10 @@ class ServerWindow : Service() {
         fun setData(data: String) {
             service.get()?.upData(data)
         }
+
+        fun sayHello() {
+            service.get()?.upData(gson.toJson(Msg.generateHello()))
+        }
     }
 
     private fun upData(data: String) {
@@ -151,99 +158,10 @@ class ServerWindow : Service() {
 //        private var y = 0
 //        private var firstX = 0
 //        private var firstY = 0
-        private var pointerCount = 0
-        private var lastTouchDown = 0L
-        private val pointersState: PointersState =
-            PointersState()
-        private val pointerProperties = arrayOfNulls<PointerProperties>(PointersState.MAX_POINTERS)
-        private val pointerCoords = arrayOfNulls<PointerCoords>(PointersState.MAX_POINTERS)
-        private val device by lazy { Device(null) }
-
-        init {
-            for (i in 0 until PointersState.MAX_POINTERS) {
-                val props = PointerProperties()
-                props.toolType = MotionEvent.TOOL_TYPE_FINGER
-                val coords = PointerCoords()
-                coords.orientation = 0f
-                coords.size = 0f
-                pointerProperties[i] = props
-                pointerCoords[i] = coords
-            }
-        }
+        private val TAG = "ServerWindow"
 
         override fun onTouch(view: View, event: MotionEvent): Boolean {
-            val now = SystemClock.uptimeMillis()
-            var action1 = event.action
-            val point = Point(event.x.toInt(), event.y.toInt())
-            val pointerIndex = pointersState.getPointerIndex(-2)
-            val pointer = pointersState[pointerIndex]
-            pointer.point = point
-            pointer.pressure = if (event.action == MotionEvent.ACTION_UP)  0 else 1f
-            pointer.isUp = action == MotionEvent.ACTION_UP
-
-            val pointerCount = pointersState.update(pointerProperties, pointerCoords)
-            if (pointerCount == 1) {
-                if (action1 == MotionEvent.ACTION_DOWN) {
-                    lastTouchDown = now
-                }
-            } else {
-                // secondary pointers must use ACTION_POINTER_* ORed with the pointerIndex
-                if (action1 == MotionEvent.ACTION_UP) {
-                    action1 =
-                        MotionEvent.ACTION_POINTER_UP or (pointerIndex shl MotionEvent.ACTION_POINTER_INDEX_SHIFT)
-                } else if (action == MotionEvent.ACTION_DOWN) {
-                    action1 =
-                        MotionEvent.ACTION_POINTER_DOWN or (pointerIndex shl MotionEvent.ACTION_POINTER_INDEX_SHIFT)
-                }
-            }
-            val event = MotionEvent
-                .obtain(
-                    lastTouchDown,
-                    now,
-                    action1,
-                    pointerCount,
-                    pointerProperties,
-                    pointerCoords,
-                    0,
-                    0,
-                    1f,
-                    1f,
-                    0,
-                    0,
-                    InputDevice.SOURCE_TOUCHSCREEN,
-                    0
-                )
-            device.injectEvent(event, Device.INJECT_MODE_ASYNC);
-//            when (event.action) {
-//                MotionEvent.ACTION_DOWN -> {
-//                    x = event.rawX.toInt()
-//                    y = event.rawY.toInt()
-//                    firstX = event.rawX.toInt()
-//                    firstY = event.rawY.toInt()
-//                }
-//                MotionEvent.ACTION_MOVE -> {
-//                    val nowx = event.rawX.toInt()
-//                    val nowy = event.rawY.toInt()
-//                    val movedx = nowx - x
-//                    val movedy = nowy - y
-//                    x = nowx
-//                    y = nowy
-//
-//                    lp.x = lp.x - movedx
-//                    lp.y = lp.y - movedy
-//                    // 更新悬浮窗控件布局
-////                    windowManager.updateViewLayout(view, lp)
-//                }
-//                MotionEvent.ACTION_UP -> {
-////                    Log.i(TAG, "onTouch: ACTION_UP ${event.getPointerId(event.actionIndex)}")
-////                    val minSlop = 3
-////                    if (abs(event.rawX.toInt() - firstX) < minSlop && abs(event.rawY.toInt() - firstY) < minSlop) {
-////                        Log.i("TAG_TIME", "onTouch: ${System.currentTimeMillis()}")
-////                        sendToServer("input tap 500 1500")
-////                        view.performClick()
-////                    }
-//                }
-//            }
+            sendToServer(gson.toJson(Msg.generateControlMsg(event)))
             return false
         }
     }
@@ -256,13 +174,18 @@ class ServerWindow : Service() {
         return super.onUnbind(intent)
     }
 
-    class ServerReceive(private val br: BufferedReader) : Thread() {
+    class ServerReceive(private val br: BufferedReader, serverWindow: ServerWindow) : Thread() {
+
+        private val ref: WeakReference<ServerWindow> = WeakReference(serverWindow)
+
         override fun run() {
             while (!isInterrupted) {
-                var str: String
                 try {
-                    str = br.readLine()
-                    println("接受 C 的信息:$str")
+                    val string = br.readLine()
+                    if (string.contains(SocketEvents.ACTION_HELLO)) {
+                        ref.get()?.callback?.invoke(3, string)
+                    }
+                    println("接受 C 的信息:$string")
                 } catch (e: Exception) {
                     e.printStackTrace()
                     interrupt()
@@ -270,10 +193,6 @@ class ServerWindow : Service() {
             }
         }
     }
-
-    //MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=40.25, y[0]=50.25, toolType[0]=TOOL_TYPE_FINGER, buttonState=0, classification=NONE, metaState=0, flags=0x40000, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=2493072910, downTime=2493072910, deviceId=4, source=0x1002, displayId=0, eventId=216516680 }
-    //MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=40.25, y[0]=50.25, toolType[0]=TOOL_TYPE_FINGER, buttonState=0, classification=NONE, metaState=0, flags=0x40000, edgeFlags=0x0, pointerCount=1, historySize=1, eventTime=2493072920, downTime=2493072910, deviceId=4, source=0x1002, displayId=0, eventId=849214663 }
-    //MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=40.25, y[0]=50.25, toolType[0]=TOOL_TYPE_FINGER, buttonState=0, classification=NONE, metaState=0, flags=0x40000, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=2493072922, downTime=2493072910, deviceId=4, source=0x1002, displayId=0, eventId=155553049 }
 
     class ReceiveS(private val ds: DatagramSocket, serverWindow: ServerWindow) : Thread() {
 

@@ -20,7 +20,7 @@ class ServerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         binding.targetConfig.setOnClickListener {
-            floatingBind?.setData("ask from k40") ?: Toast.makeText(this, "服务未启动", Toast.LENGTH_SHORT).show()
+            floatingBind?.sayHello() ?: Toast.makeText(this, "服务未启动", Toast.LENGTH_SHORT).show()
         }
         binding.startServer.setOnClickListener {
             startServer()
@@ -93,6 +93,7 @@ class ServerActivity : AppCompatActivity() {
     private fun stopService() {
         try {
             unbindService(conn)
+            floatingBind = null
         } catch (e: Exception) {
             e.printStackTrace()
         }

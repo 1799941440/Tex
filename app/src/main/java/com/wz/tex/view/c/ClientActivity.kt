@@ -81,6 +81,7 @@ class ClientActivity : AppCompatActivity() {
     private fun stopService() {
         try {
             unbindService(conn)
+            floatingBind = null
         } catch (e: Exception) {
             e.printStackTrace()
         }

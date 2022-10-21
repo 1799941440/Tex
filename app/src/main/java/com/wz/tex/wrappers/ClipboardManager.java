@@ -76,7 +76,6 @@ public class ClipboardManager {
             setPrimaryClip(method, manager, clipData);
             return true;
         } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
-            Ln.e("Could not invoke method", e);
             return false;
         }
     }
@@ -109,7 +108,6 @@ public class ClipboardManager {
             addPrimaryClipChangedListener(method, manager, listener);
             return true;
         } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
-            Ln.e("Could not invoke method", e);
             return false;
         }
     }
