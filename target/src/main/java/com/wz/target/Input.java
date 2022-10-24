@@ -1,10 +1,8 @@
-package com.wz.tex;
+package com.wz.target;
 
 import android.annotation.SuppressLint;
 import android.os.IBinder;
 import android.os.IInterface;
-
-import com.wz.tex.wrappers.InputManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

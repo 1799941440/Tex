@@ -64,7 +64,7 @@ class ServerWindow : Service() {
                     pw?.println(strToSend)
                     pw?.flush()
                 }
-                Log.i("TAG_TIME", "send-sent: $strToSend}")
+                Log.i("TAG_TIME", "send-sent: $strToSend")
             } catch (e: Exception) {
                 e.printStackTrace()
             }

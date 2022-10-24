@@ -12,8 +12,6 @@ import android.view.*
 import android.view.MotionEvent.ACTION_CANCEL
 import com.google.gson.Gson
 import com.wz.tex.BitmapUtils
-import com.wz.tex.Device
-import com.wz.tex.Input
 import com.wz.tex.R
 import com.wz.tex.bean.Msg
 import com.wz.tex.bean.Point
@@ -27,7 +25,6 @@ import java.io.PrintWriter
 import java.lang.ref.WeakReference
 import java.net.*
 import kotlin.concurrent.thread
-import kotlin.math.abs
 import android.graphics.Point as SPoint
 
 class ClientWindow : Service() {
@@ -214,7 +211,7 @@ class ClientWindow : Service() {
             }
             val message = generateEvent(now, action1, pointerCount)
             println(message)
-            Input.getInstance().inputManager.injectInputEvent(message, Device.INJECT_MODE_ASYNC)
+//            com.wz.target.Input.getInstance().inputManager.injectInputEvent(message, Device.INJECT_MODE_ASYNC)
         }
 
         private fun generateEvent(
