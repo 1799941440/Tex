@@ -6,9 +6,11 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 
 import com.google.gson.Gson;
+import com.wz.base.Msg;
+import com.wz.base.NetUtil;
+import com.wz.base.SkillLayoutConfig;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -50,6 +52,8 @@ public class Client {
                     isProcessing = false;
                 }
             } while(isProcessing);
+            socket.close();
+            serverSocket.close();
         } catch (Exception e) {
             Log.e(TAG, "com.wz.client exit with Exception");
             isProcessing = false;
@@ -59,16 +63,44 @@ public class Client {
         }
     }
 
+    private static int offsetX, offsetY;
     private static void readLayoutConfig() {
         List<String> strings = NetUtil.readFileByLines("data/local/tmp/layout.txt");
-        for (String config : strings) {
-            Log.i(TAG, "readLayoutConfig: " + config);
+        if (strings.size() == 1) {
+            SkillLayoutConfig skillLayoutConfig = gson.fromJson(strings.get(0), SkillLayoutConfig.class);
+            offsetX = skillLayoutConfig.getOffsetX();
+            offsetY = skillLayoutConfig.getOffsetY();
+            Log.i(TAG, "readLayoutConfig: offsetX = " + offsetX + ", offsetY = " + offsetY);
         }
+//        for (String config : strings) {
+//            Log.i(TAG, "readLayoutConfig: " + config);
+//        }
     }
 
     private static void processEvent(Msg msg) {
         long now = SystemClock.uptimeMillis();
         int action = msg.getAction();
+        Point point = new Point(msg.getX() + offsetX, msg.getY() + offsetY);
+        int pointerIndex = pointersState.getPointerIndex(-2);
+        Pointer pointer = pointersState.get(pointerIndex);
+        pointer.setPoint(point);
+        pointer.setPressure(action == MotionEvent.ACTION_UP ? 0f : 1f);
+        pointer.setUp(action == MotionEvent.ACTION_UP);
+        pointerCount = pointersState.update(pointerProperties, pointerCoords);
+        if (pointerCount == 1) {
+            if (action == MotionEvent.ACTION_DOWN) {
+                lastTouchDown = now;
+            }
+        } else {
+            // secondary pointers must use ACTION_POINTER_* ORed with the pointerIndex
+            if (action == MotionEvent.ACTION_UP) {
+                action = MotionEvent.ACTION_POINTER_UP | (pointerIndex << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
+            } else if (action == MotionEvent.ACTION_DOWN) {
+                action = MotionEvent.ACTION_POINTER_DOWN | (pointerIndex << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
+            }
+        }
+        MotionEvent message = generateEvent(now, action);
+        Input.getInstance().getInputManager().injectInputEvent(message, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 
     private static void initSockets() throws Exception {
@@ -85,7 +117,7 @@ public class Client {
         bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }
 
-    private MotionEvent generateEvent(long now, int action, int pointCount) {
+    private static MotionEvent generateEvent(long now, int action) {
         return MotionEvent
                 .obtain(
                         lastTouchDown, now, action, pointerCount, pointerProperties, pointerCoords, 0,

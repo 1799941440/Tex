@@ -1,4 +1,4 @@
-package com.wz.target;
+package com.wz.base;
 
 import java.io.BufferedReader;
 import java.io.File;

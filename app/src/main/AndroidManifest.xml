@@ -28,7 +28,7 @@
         <activity android:name=".view.c.ClientActivity" />
 
         <activity
-            android:name=".ConfigViewActivity"
+            android:name=".view.ConfigViewActivity"
             android:theme="@style/NoBar"
             android:screenOrientation="landscape" />
 

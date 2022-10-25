@@ -1,14 +1,14 @@
-package com.wz.tex
+package com.wz.tex.view
 
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.graphics.drawable.BitmapDrawable
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.wz.tex.BitmapUtils
 import com.wz.tex.databinding.LayoutConfigViewBinding
 import java.io.File
 import java.io.IOException
@@ -19,6 +19,7 @@ class ConfigViewActivity : AppCompatActivity() {
 
     private val binding by lazy { LayoutConfigViewBinding.inflate(layoutInflater) }
     private val REQUEST_GET_IMAGE = 1
+    private var from = FROM_CONTROL
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +30,7 @@ class ConfigViewActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_FULLSCREEN
                 or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
         setContentView(binding.root)
+        from = intent?.getIntExtra("from", FROM_CONTROL) ?: FROM_CONTROL
         loadTempFile()
         with(binding.panel) {
             post {
@@ -87,12 +89,18 @@ class ConfigViewActivity : AppCompatActivity() {
                     inputStream?.close()
                     options.inJustDecodeBounds = false
                     val selectdBitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(it), null, options)
-                    BitmapUtils.saveBitmap("temp.jpeg", selectdBitmap, this)
+                    val name = if (from == FROM_CONTROL) "control.jpeg" else "client.jpeg"
+                    BitmapUtils.saveBitmap(name, selectdBitmap, this)
                     binding.panel.background = BitmapDrawable(this@ConfigViewActivity.resources, selectdBitmap)
                 } catch (ioe: IOException) {
                     ioe.printStackTrace()
                 }
             }
         }
+    }
+
+    companion object {
+        const val FROM_CONTROL = 0
+        const val FROM_CLIENT = 1
     }
 }

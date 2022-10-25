@@ -11,11 +11,9 @@ import android.util.Log
 import android.view.*
 import android.view.MotionEvent.ACTION_CANCEL
 import com.google.gson.Gson
+import com.wz.base.Msg
 import com.wz.tex.BitmapUtils
 import com.wz.tex.R
-import com.wz.tex.bean.Msg
-import com.wz.tex.bean.Point
-import com.wz.tex.bean.PointersState
 import com.wz.tex.view.SocketEvents.ACTION_EVENT
 import com.wz.tex.view.SocketEvents.ACTION_HELLO
 import kotlinx.coroutines.*
@@ -144,21 +142,6 @@ class ClientWindow : Service() {
         private val ref: WeakReference<ClientWindow> = WeakReference(clientWindow)
         private var pointerCount = 0
         private var lastTouchDown = 0L
-        private val pointersState: PointersState = PointersState()
-        private val pointerProperties = arrayOfNulls<MotionEvent.PointerProperties>(PointersState.MAX_POINTERS)
-        private val pointerCoords = arrayOfNulls<MotionEvent.PointerCoords>(PointersState.MAX_POINTERS)
-
-        init {
-            for (i in 0 until PointersState.MAX_POINTERS) {
-                val props = MotionEvent.PointerProperties()
-                props.toolType = MotionEvent.TOOL_TYPE_FINGER
-                val coords = MotionEvent.PointerCoords()
-                coords.orientation = 0f
-                coords.size = 0f
-                pointerProperties[i] = props
-                pointerCoords[i] = coords
-            }
-        }
 
         override fun run() {
             while (!isInterrupted) {
@@ -167,7 +150,7 @@ class ClientWindow : Service() {
                     val string = br.readLine()
                     println("接收 S 的信息$string ${System.currentTimeMillis()}")
                     if (string.contains(ACTION_EVENT)) {
-                        processEvent(string)
+
                     } else if (string.contains(ACTION_HELLO)) {
                         val fromJson = gson.fromJson(string, Msg::class.java)
                         ref.get()?.sendAnswer(fromJson.msg)
@@ -179,50 +162,6 @@ class ClientWindow : Service() {
                 }
             }
         }
-
-        @Throws(Exception::class)
-        private fun processEvent(event: String) {
-            val fromJson = gson.fromJson(event, Msg::class.java)
-            val now = SystemClock.uptimeMillis()
-            var action1 = fromJson.action ?: ACTION_CANCEL
-            val offsetX = ref.get()?.iconPositions?.get(0)?.first ?: 0
-            val offsetY = ref.get()?.iconPositions?.get(0)?.second ?: 0
-            val point = Point((fromJson.x ?: 0) + offsetX, (fromJson.y ?: 0) + offsetY)
-            val pointerIndex = pointersState.getPointerIndex(-2)
-            val pointer = pointersState[pointerIndex]
-            pointer.point = point
-            pointer.pressure = if (fromJson.action == MotionEvent.ACTION_UP)  0f else 1f
-            pointer.isUp = android.R.attr.action == MotionEvent.ACTION_UP
-
-            pointerCount = pointersState.update(pointerProperties, pointerCoords)
-            if (pointerCount == 1) {
-                if (action1 == MotionEvent.ACTION_DOWN) {
-                    lastTouchDown = now
-                }
-            } else {
-                // secondary pointers must use ACTION_POINTER_* ORed with the pointerIndex
-                if (action1 == MotionEvent.ACTION_UP) {
-                    action1 =
-                        MotionEvent.ACTION_POINTER_UP or (pointerIndex shl MotionEvent.ACTION_POINTER_INDEX_SHIFT)
-                } else if (android.R.attr.action == MotionEvent.ACTION_DOWN) {
-                    action1 =
-                        MotionEvent.ACTION_POINTER_DOWN or (pointerIndex shl MotionEvent.ACTION_POINTER_INDEX_SHIFT)
-                }
-            }
-            val message = generateEvent(now, action1, pointerCount)
-            println(message)
-//            com.wz.target.Input.getInstance().inputManager.injectInputEvent(message, Device.INJECT_MODE_ASYNC)
-        }
-
-        private fun generateEvent(
-            now: Long,
-            action1: Int,
-            pointerCount: Int
-        ) = MotionEvent
-            .obtain(
-                lastTouchDown, now, action1, pointerCount, pointerProperties, pointerCoords, 0,
-                0, 1f, 1f, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0
-            )
     }
 }
 

@@ -31,7 +31,7 @@ public class BitmapUtils {
      * @param bm   picture to save
      */
 
-    static void saveBitmap(String name, Bitmap bm, Context mContext) {
+    public static void saveBitmap(String name, Bitmap bm, Context mContext) {
         //指定我们想要存储文件的地址
         String TargetPath = mContext.getFilesDir() + "/images/";
         Log.d("Save Bitmap", "Save Path=" + TargetPath);

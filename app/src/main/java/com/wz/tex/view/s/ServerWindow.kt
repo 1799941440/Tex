@@ -9,8 +9,8 @@ import android.os.IBinder
 import android.util.Log
 import android.view.*
 import com.google.gson.Gson
+import com.wz.base.Msg
 import com.wz.tex.R
-import com.wz.tex.bean.Msg
 import android.graphics.Point as SPoint
 import com.wz.tex.view.SocketEvents
 import kotlinx.coroutines.Dispatchers
