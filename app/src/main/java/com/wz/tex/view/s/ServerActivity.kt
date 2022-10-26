@@ -10,6 +10,7 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.wz.tex.databinding.LayoutServerBinding
+import com.wz.tex.view.ConfigViewActivity
 
 class ServerActivity : AppCompatActivity() {
 
@@ -27,6 +28,11 @@ class ServerActivity : AppCompatActivity() {
         }
         binding.stopServer.setOnClickListener {
             stopService()
+        }
+        binding.serverLayout.setOnClickListener {
+            startActivity(Intent(this, ConfigViewActivity::class.java).apply {
+                putExtra("from", ConfigViewActivity.FROM_CONTROL)
+            })
         }
     }
 

@@ -7,14 +7,14 @@ public class SkillLayoutConfig {
      * 等比放大拉伸映射2 宽高等比放大，计算映射
      */
     private int mapType;
-    private int offsetX;
-    private int offsetY;
+    private float offsetX;
+    private float offsetY;
     /**
      * {@link android.content.res.Configuration#ORIENTATION_PORTRAIT }
      */
     private int orientation;
-    private int width;
-    private int height;
+    private float width;
+    private float height;
 
     public int getIndex() {
         return index;
@@ -32,19 +32,19 @@ public class SkillLayoutConfig {
         this.mapType = mapType;
     }
 
-    public int getOffsetX() {
+    public float getOffsetX() {
         return offsetX;
     }
 
-    public void setOffsetX(int offsetX) {
+    public void setOffsetX(float offsetX) {
         this.offsetX = offsetX;
     }
 
-    public int getOffsetY() {
+    public float getOffsetY() {
         return offsetY;
     }
 
-    public void setOffsetY(int offsetY) {
+    public void setOffsetY(float offsetY) {
         this.offsetY = offsetY;
     }
 
@@ -56,19 +56,19 @@ public class SkillLayoutConfig {
         this.orientation = orientation;
     }
 
-    public int getWidth() {
+    public float getWidth() {
         return width;
     }
 
-    public void setWidth(int width) {
+    public void setWidth(float width) {
         this.width = width;
     }
 
-    public int getHeight() {
+    public float getHeight() {
         return height;
     }
 
-    public void setHeight(int height) {
+    public void setHeight(float height) {
         this.height = height;
     }
 }

@@ -1,5 +1,7 @@
 package com.wz.target;
 
+import static com.wz.base.NetUtil.LAYOUT_CLIENT;
+
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.InputDevice;
@@ -16,12 +18,16 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Client {
 
+    public static final int DEFAULT_TIMEOUT = 60 * 1000;
+    public static int timeout = DEFAULT_TIMEOUT;
     private static Socket socket;
     private static ServerSocket serverSocket;
     private static PrintWriter printWriter;
@@ -36,6 +42,7 @@ public class Client {
     private static MotionEvent.PointerCoords[] pointerCoords = new MotionEvent.PointerCoords[PointersState.MAX_POINTERS];
 
     public static void main(String[] args) {
+        System.out.println(Arrays.toString(args));
         try {
             initPointers();
             readLayoutConfig();
@@ -54,6 +61,10 @@ public class Client {
             } while(isProcessing);
             socket.close();
             serverSocket.close();
+        } catch (SocketTimeoutException e) {
+            Log.e(TAG, "连接超时");
+            isProcessing = false;
+            e.printStackTrace();
         } catch (Exception e) {
             Log.e(TAG, "com.wz.client exit with Exception");
             isProcessing = false;
@@ -65,11 +76,11 @@ public class Client {
 
     private static int offsetX, offsetY;
     private static void readLayoutConfig() {
-        List<String> strings = NetUtil.readFileByLines("data/local/tmp/layout.txt");
+        List<String> strings = NetUtil.readFileByLines(LAYOUT_CLIENT);
         if (strings.size() == 1) {
             SkillLayoutConfig skillLayoutConfig = gson.fromJson(strings.get(0), SkillLayoutConfig.class);
-            offsetX = skillLayoutConfig.getOffsetX();
-            offsetY = skillLayoutConfig.getOffsetY();
+            offsetX = (int) skillLayoutConfig.getOffsetX();
+            offsetY = (int) skillLayoutConfig.getOffsetY();
             Log.i(TAG, "readLayoutConfig: offsetX = " + offsetX + ", offsetY = " + offsetY);
         }
 //        for (String config : strings) {
@@ -111,8 +122,9 @@ public class Client {
         serverSocket = new ServerSocket(55555, 50, InetAddress.getByName(ipAddress1.get(0)));
         Log.e(TAG, "serverSocket start ip=" + ipAddress1.get(0));
         serverSocket.setPerformancePreferences(-1, 10, -1);
-        serverSocket.setSoTimeout(60000);
+        serverSocket.setSoTimeout(timeout);
         socket = serverSocket.accept();
+        Log.e(TAG, "连接成功");
         printWriter = new PrintWriter(socket.getOutputStream());
         bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }

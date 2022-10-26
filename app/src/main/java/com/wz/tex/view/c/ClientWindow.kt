@@ -6,10 +6,9 @@ import android.graphics.PixelFormat
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
-import android.os.SystemClock
 import android.util.Log
 import android.view.*
-import android.view.MotionEvent.ACTION_CANCEL
+import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
 import com.google.gson.Gson
 import com.wz.base.Msg
 import com.wz.tex.BitmapUtils
@@ -66,24 +65,44 @@ class ClientWindow : Service() {
             return
         }
         view = View.inflate(this, R.layout.window_float, null)
-        val lp = WindowManager.LayoutParams()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        } else {
-            lp.type = WindowManager.LayoutParams.TYPE_PHONE
-        }
-        lp.flags =
+
+        val layoutParams: WindowManager.LayoutParams = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-        lp.format = PixelFormat.RGBA_8888
-        lp.gravity = Gravity.BOTTOM or Gravity.END
-        lp.width = WindowManager.LayoutParams.WRAP_CONTENT
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+            PixelFormat.RGBA_8888
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            layoutParams.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        }
+//        val lp = WindowManager.LayoutParams()
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+//        } else {
+//            lp.type = WindowManager.LayoutParams.TYPE_PHONE
+//        }
+//        lp.flags =
+//            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+//                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+//                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+//                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+//                    WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR or
+//                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
+//        lp.format = PixelFormat.RGBA_8888
+//        lp.gravity = Gravity.END or Gravity.BOTTOM
+//        lp.width = WindowManager.LayoutParams.MATCH_PARENT
+//        lp.height = WindowManager.LayoutParams.MATCH_PARENT
         val outSize = SPoint()
         windowManager.defaultDisplay.getRealSize(outSize)
-        lp.y = (outSize.y * 0.5).toInt()
-        windowManager.addView(view, lp)
+//        lp.y = (outSize.y * 0.5).toInt()
+        windowManager.addView(view, layoutParams)
         view.post{
             val location = IntArray(2)
             view.getLocationOnScreen(location)

@@ -76,21 +76,26 @@ class ServerWindow : Service() {
             return
         }
         view = View.inflate(this, R.layout.window_float, null)
-        val lp = WindowManager.LayoutParams()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        } else {
-            lp.type = WindowManager.LayoutParams.TYPE_PHONE
+        val lp: WindowManager.LayoutParams = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+            PixelFormat.RGBA_8888
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            lp.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         }
-        lp.flags =
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-        lp.format = PixelFormat.RGBA_8888
-        lp.gravity = Gravity.BOTTOM or Gravity.END
-        lp.width = WindowManager.LayoutParams.WRAP_CONTENT
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT
         val outSize = SPoint()
         windowManager.defaultDisplay.getRealSize(outSize)
-        lp.y = (outSize.y * 0.5).toInt()
+//        lp.y = (outSize.y * 0.5).toInt()
         windowManager.addView(view, lp)
 
         view.setOnTouchListener(FloatingOnTouchListener())

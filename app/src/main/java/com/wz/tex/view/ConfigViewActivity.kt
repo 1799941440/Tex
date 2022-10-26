@@ -6,20 +6,26 @@ import android.graphics.Point
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.google.gson.Gson
+import com.wz.base.NetUtil
+import com.wz.base.SkillLayoutConfig
 import com.wz.tex.BitmapUtils
+import com.wz.tex.R
 import com.wz.tex.databinding.LayoutConfigViewBinding
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 
-
 class ConfigViewActivity : AppCompatActivity() {
 
     private val binding by lazy { LayoutConfigViewBinding.inflate(layoutInflater) }
+    private val gson by lazy { Gson() }
     private val REQUEST_GET_IMAGE = 1
     private var from = FROM_CONTROL
+    private var name = "control.jpeg"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +37,9 @@ class ConfigViewActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
         setContentView(binding.root)
         from = intent?.getIntExtra("from", FROM_CONTROL) ?: FROM_CONTROL
-        loadTempFile()
+        if (from == FROM_CLIENT) name = "client.jpeg"
+        loadTempBg()
+        loadDefaultConfigFile()
         with(binding.panel) {
             post {
                 val widthPixels = resources.displayMetrics.widthPixels
@@ -45,6 +53,46 @@ class ConfigViewActivity : AppCompatActivity() {
         binding.selectBg.setOnClickListener {
             selectImage()
         }
+    }
+
+    private val defaultLayoutFile by lazy {
+        File(if (from == FROM_CONTROL) NetUtil.LAYOUT_CONTROL else NetUtil.LAYOUT_CLIENT)
+    }
+
+    private fun loadDefaultConfigFile() {
+        loadConfigFile(defaultLayoutFile)
+    }
+
+    private fun loadConfigFile(file: File) {
+        binding.panel.removeAllViews()
+        if (!file.exists()) {
+            val mkdirs = file.mkdirs()
+            if (!mkdirs) {
+                Runtime.getRuntime().exec("chmod 777 /data/local/tmp")
+            }
+        } else {
+            val readFileByLines = NetUtil.readFileByLines(file)
+            if (readFileByLines.size > 0) {
+                readFileByLines.forEach {
+                    addButton(gson.fromJson(it, SkillLayoutConfig::class.java))
+                }
+            }
+        }
+    }
+
+    private fun addButton(info: SkillLayoutConfig) {
+        val inflate = layoutInflater.inflate(R.layout.item_button, binding.panel, false)
+        inflate.tag = info.index
+        if (inflate is TextView) inflate.text = info.index.toString()
+        val layoutParams = inflate.layoutParams as ConstraintLayout.LayoutParams
+        layoutParams.startToStart = R.id.panel
+        layoutParams.topToTop = R.id.panel
+        layoutParams.width = info.width.toInt()
+        layoutParams.height = info.height.toInt()
+        layoutParams.marginStart = info.offsetX.toInt()
+        layoutParams.topMargin = info.offsetY.toInt()
+        inflate.layoutParams = layoutParams
+        binding.panel.addView(inflate)
     }
 
     private fun getScreenResolution(): Int { // 获取屏幕真实分辨率
@@ -61,11 +109,11 @@ class ConfigViewActivity : AppCompatActivity() {
     }
 
     @Throws
-    private fun loadTempFile() {
+    private fun loadTempBg() {
         val value = filesDir.absolutePath + "/images/"
         val file = File(value)
         if (file.exists()) {
-            val exists = File(value + "temp.jpeg")
+            val exists = File(value + name)
             if (exists.exists()) {
                 val inputStream = exists.inputStream()
                 val decodeStream = BitmapFactory.decodeStream(inputStream, null, BitmapFactory.Options().apply {
@@ -88,10 +136,10 @@ class ConfigViewActivity : AppCompatActivity() {
                     BitmapFactory.decodeStream(inputStream, null, options)
                     inputStream?.close()
                     options.inJustDecodeBounds = false
-                    val selectdBitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(it), null, options)
+                    val selectedBitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(it), null, options)
                     val name = if (from == FROM_CONTROL) "control.jpeg" else "client.jpeg"
-                    BitmapUtils.saveBitmap(name, selectdBitmap, this)
-                    binding.panel.background = BitmapDrawable(this@ConfigViewActivity.resources, selectdBitmap)
+                    BitmapUtils.saveBitmap(name, selectedBitmap, this)
+                    binding.panel.background = BitmapDrawable(this@ConfigViewActivity.resources, selectedBitmap)
                 } catch (ioe: IOException) {
                     ioe.printStackTrace()
                 }

@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -87,5 +88,54 @@ public class BitmapUtils {
                 ((ip >> 8) & 0xFF) + "." +
                 ((ip >> 16) & 0xFF) + "." +
                 (ip >> 24 & 0xFF);
+    }
+
+    public static boolean saveAssetsToSDCard(Context context, String assetsFileName) {
+        boolean isSave;
+        String fileDir = context.getFilesDir() + File.separator;
+        Log.i("saveAssetsToSDCard", "saveAssetsToSDCard: fileDir = " + fileDir);
+        File fileD = new File(fileDir);
+        if (!fileD.exists() || !fileD.isDirectory()) {
+            if (!fileD.mkdirs()) { // 文件夹创建失败
+                Log.i("saveAssetsToSDCard", "saveAssetToSDCard: file make dir file");
+            }
+        }
+        String filePath = fileDir + assetsFileName;
+        File file = new File(filePath);
+        //如果文件存在，则不拷贝
+        if (file.exists()) {
+            return true;
+        }
+        InputStream is = null;
+        FileOutputStream fos = null;
+        try {
+            is = context.getAssets().open(assetsFileName);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            fos = new FileOutputStream(file);
+            fos.write(buffer);
+            isSave = true;
+//            Log.i("saveAssetsToSDCard", "saveAssetToSDCard: finish");
+        } catch (Exception e) {
+            isSave = false;
+            e.printStackTrace();
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return isSave;
     }
 }

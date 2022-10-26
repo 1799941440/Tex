@@ -88,6 +88,15 @@
         app:layout_constraintStart_toEndOf="@id/targetConfig"
         app:layout_constraintTop_toBottomOf="@id/targetPort" />
 
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/serverLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="设置布局"
+        android:textAllCaps="false"
+        app:layout_constraintStart_toEndOf="@id/stopServer"
+        app:layout_constraintTop_toBottomOf="@id/targetPort" />
+
     <TextView
         android:id="@+id/myState"
         android:layout_width="wrap_content"

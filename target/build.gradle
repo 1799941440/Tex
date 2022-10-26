@@ -16,14 +16,33 @@ android {
     }
 
     buildTypes {
+        debug {
+
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "target"
+        }
+    }
+}
+
+gradle.projectsEvaluated {
+    assembleDebug.doLast {
+        copy {
+            from("${project.buildDir}/intermediates/apk/debug/target")
+            into("${rootProject.rootDir}/app/src/main/assets")
+        }
     }
 }
 

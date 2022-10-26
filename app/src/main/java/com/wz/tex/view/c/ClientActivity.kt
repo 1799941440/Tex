@@ -12,6 +12,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.wz.tex.BitmapUtils
 import com.wz.tex.databinding.LayoutClientBinding
+import com.wz.tex.view.ConfigViewActivity
+import com.wz.tex.view.ConfigViewActivity.Companion.FROM_CLIENT
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
 
 class ClientActivity : AppCompatActivity() {
 
@@ -27,11 +33,24 @@ class ClientActivity : AppCompatActivity() {
         binding.refreshIP.setOnClickListener {
             binding.myIp.text = BitmapUtils.getIntranetIPAddress(this)
         }
-        binding.myConfig.setOnClickListener {
+        binding.shell.setOnClickListener {
+            execShell(run2)
+        }
+        binding.startPreview.setOnClickListener {
             startServer()
         }
-        binding.closeClient.setOnClickListener {
+        binding.closePreview.setOnClickListener {
             stopService()
+        }
+        binding.clientLayout.setOnClickListener {
+            startActivity(Intent(this, ConfigViewActivity::class.java).apply {
+                putExtra("from", FROM_CLIENT)
+            })
+        }
+        if (BitmapUtils.saveAssetsToSDCard(this, "target")) {
+            Toast.makeText(this, "检测服务状态成功", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "初始化失败", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -97,5 +116,56 @@ class ClientActivity : AppCompatActivity() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    private val run by lazy { "CLASSPATH=${application.filesDir.path}/target app_process ${application.filesDir.path} com.wz.target.Client" }
+    private val run2 by lazy { arrayOf("/system/bin/sh", "-c", run) }
+
+    private fun execShell(cmd: Array<String>): String {
+        var result = ""
+        try {
+            val process = Runtime.getRuntime().exec(cmd)
+            val mReader = InputStreamReader(process.inputStream)
+            result = mReader.readText()
+            mReader.close()
+            process.destroy()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            println("YM========执行Linux命令异常==========${e.message}")
+        }
+        return result
+    }
+
+    fun sendCmd(cmd: String){
+        var process: Process? = null
+        try {
+            val p = ProcessBuilder("/system/bin/sh", "-c", cmd)
+            p.redirectErrorStream(true)
+            process = p.start()
+            process.waitFor()
+            toStings(process?.inputStream)
+        } catch ( e: InterruptedException) {
+            e.printStackTrace();
+        } catch ( e: IOException) {
+            e.printStackTrace()
+        } finally {
+            process?.destroy()
+        }
+    }
+
+    private fun toStings(inputStream: InputStream?){
+        val stringBuilder = StringBuilder()
+        val bufferedReader = BufferedReader(InputStreamReader(inputStream))
+        var firstLine = true
+        var line: String? = null
+        while (bufferedReader.readLine().also { line = it } != null) {
+            if (!firstLine) {
+                stringBuilder.append(System.getProperty("line.separator"))
+            } else {
+                firstLine = false
+            }
+            stringBuilder.append(line)
+        }
+        Log.e("YM","result:$stringBuilder")
     }
 }

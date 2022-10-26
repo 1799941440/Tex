@@ -69,28 +69,46 @@
         app:layout_constraintTop_toBottomOf="@id/myPort" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/myConfig"
+        android:id="@+id/shell"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="开启受控端"
+        android:text="shell"
         android:textAllCaps="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/myState" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/closeClient"
+        android:id="@+id/startPreview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="关闭受控端"
+        android:text="开启预览"
         android:textAllCaps="false"
-        app:layout_constraintStart_toEndOf="@id/myConfig"
+        app:layout_constraintStart_toEndOf="@id/shell"
+        app:layout_constraintTop_toBottomOf="@id/myState" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/closePreview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="关闭预览"
+        android:textAllCaps="false"
+        app:layout_constraintStart_toEndOf="@id/startPreview"
+        app:layout_constraintTop_toBottomOf="@id/myState" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/clientLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="设置布局"
+        android:textAllCaps="false"
+        app:layout_constraintStart_toEndOf="@id/closePreview"
         app:layout_constraintTop_toBottomOf="@id/myState" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/closeClient">
+        app:layout_constraintTop_toBottomOf="@id/closePreview">
 
         <LinearLayout
             android:layout_width="match_parent"
