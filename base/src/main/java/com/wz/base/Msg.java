@@ -6,10 +6,19 @@ public class Msg {
     private String socketAction;
     private String msg;
     //<editor-fold desc="socketAction = event">
+    private int index;
     private int action;
     private int x;
     private int y;
     //</editor-fold>
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
 
     public String getSocketAction() {
         return socketAction;
@@ -51,9 +60,10 @@ public class Msg {
         this.y = y;
     }
 
-    public static Msg generateControlMsg(MotionEvent e) {
+    public static Msg generateControlMsg(MotionEvent e, int index) {
         Msg temp = new Msg();
         temp.setSocketAction("event");
+        temp.setIndex(index);
         temp.setAction(e.getAction());
         temp.setX((int) e.getX());
         temp.setY((int) e.getY());

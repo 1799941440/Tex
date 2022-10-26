@@ -78,12 +78,21 @@
         app:layout_constraintTop_toBottomOf="@id/myState" />
 
     <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/shellStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="shellS"
+        android:textAllCaps="false"
+        app:layout_constraintStart_toEndOf="@id/shell"
+        app:layout_constraintTop_toBottomOf="@id/myState" />
+
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/startPreview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="开启预览"
         android:textAllCaps="false"
-        app:layout_constraintStart_toEndOf="@id/shell"
+        app:layout_constraintStart_toEndOf="@id/shellStop"
         app:layout_constraintTop_toBottomOf="@id/myState" />
 
     <androidx.appcompat.widget.AppCompatButton

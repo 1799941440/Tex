@@ -71,6 +71,7 @@ public class Client {
             e.printStackTrace();
         } finally {
             Log.e(TAG, "com.wz.client exit");
+            System.exit(0);
         }
     }
 
@@ -112,6 +113,7 @@ public class Client {
         }
         MotionEvent message = generateEvent(now, action);
         Input.getInstance().getInputManager().injectInputEvent(message, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+        message.recycle();
     }
 
     private static void initSockets() throws Exception {

@@ -75,16 +75,15 @@ class ServerWindow : Service() {
         if (::view.isInitialized) {
             return
         }
-        view = View.inflate(this, R.layout.window_float, null)
+        view = View.inflate(this, R.layout.window_float_server, null)
         val lp: WindowManager.LayoutParams = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                     WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
                     WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR or
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
                     WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
             PixelFormat.RGBA_8888
@@ -93,12 +92,12 @@ class ServerWindow : Service() {
             lp.layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         }
+        lp.gravity = Gravity.END or Gravity.BOTTOM
         val outSize = SPoint()
         windowManager.defaultDisplay.getRealSize(outSize)
-//        lp.y = (outSize.y * 0.5).toInt()
+        lp.y = (outSize.y * 0.5).toInt()
         windowManager.addView(view, lp)
-
-        view.setOnTouchListener(FloatingOnTouchListener())
+        view.setOnTouchListener(FloatingOnTouchListener(view.tag as? Int ?: 0))
     }
 
     inner class FloatingBind(temp: ServerWindow) : Binder() {
@@ -128,10 +127,10 @@ class ServerWindow : Service() {
         callback?.invoke(1, "启动成功")
     }
 
-    inner class FloatingOnTouchListener() : View.OnTouchListener {
+    inner class FloatingOnTouchListener(private val tag: Int) : View.OnTouchListener {
 
         override fun onTouch(view: View, event: MotionEvent): Boolean {
-            sendToServer(gson.toJson(Msg.generateControlMsg(event)))
+            sendToServer(gson.toJson(Msg.generateControlMsg(event, tag)))
             return false
         }
     }

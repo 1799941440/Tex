@@ -14,6 +14,9 @@ import com.wz.tex.BitmapUtils
 import com.wz.tex.databinding.LayoutClientBinding
 import com.wz.tex.view.ConfigViewActivity
 import com.wz.tex.view.ConfigViewActivity.Companion.FROM_CLIENT
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
@@ -34,7 +37,15 @@ class ClientActivity : AppCompatActivity() {
             binding.myIp.text = BitmapUtils.getIntranetIPAddress(this)
         }
         binding.shell.setOnClickListener {
-            execShell(run2)
+            MainScope().launch(Dispatchers.IO) {
+                execShell(run2)
+                launch(Dispatchers.Main) {
+                    Toast.makeText(this@ClientActivity, "停止", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+        binding.shellStop.setOnClickListener {
+            process?.destroy()
         }
         binding.startPreview.setOnClickListener {
             startServer()
@@ -121,14 +132,16 @@ class ClientActivity : AppCompatActivity() {
     private val run by lazy { "CLASSPATH=${application.filesDir.path}/target app_process ${application.filesDir.path} com.wz.target.Client" }
     private val run2 by lazy { arrayOf("/system/bin/sh", "-c", run) }
 
+    private var process: Process? = null
+
     private fun execShell(cmd: Array<String>): String {
         var result = ""
         try {
-            val process = Runtime.getRuntime().exec(cmd)
-            val mReader = InputStreamReader(process.inputStream)
+            process = Runtime.getRuntime().exec(cmd)
+            val mReader = InputStreamReader(process?.inputStream)
             result = mReader.readText()
             mReader.close()
-            process.destroy()
+            process?.destroy()
         } catch (e: Exception) {
             e.printStackTrace()
             println("YM========执行Linux命令异常==========${e.message}")
