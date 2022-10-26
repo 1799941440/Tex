@@ -16,6 +16,22 @@ public class SkillLayoutConfig {
     private float width;
     private float height;
 
+    public static SkillLayoutConfig getBlankShow() {
+        SkillLayoutConfig skillLayoutConfig = new SkillLayoutConfig();
+        skillLayoutConfig.setMapType(1);
+        skillLayoutConfig.setOrientation(1);
+        skillLayoutConfig.setWidth(100);
+        skillLayoutConfig.setHeight(100);
+        return skillLayoutConfig;
+    }
+
+    public static SkillLayoutConfig getBlankSave() {
+        SkillLayoutConfig skillLayoutConfig = new SkillLayoutConfig();
+        skillLayoutConfig.setMapType(1);
+        skillLayoutConfig.setOrientation(1);
+        return skillLayoutConfig;
+    }
+
     public int getIndex() {
         return index;
     }

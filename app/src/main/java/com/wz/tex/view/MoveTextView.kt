@@ -7,7 +7,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import kotlin.math.abs
 
-class MoveTextView(
+class MoveTextView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     def: Int = android.R.attr.textViewStyle
@@ -34,6 +34,7 @@ class MoveTextView(
                 y = event.rawY.toInt()
                 firstX = event.rawX.toInt()
                 firstY = event.rawY.toInt()
+                return true
             }
             MotionEvent.ACTION_MOVE -> {
                 val nowx = event.rawX.toInt()
@@ -43,9 +44,11 @@ class MoveTextView(
                 x = nowx
                 y = nowy
 
-                lp!!.marginStart = lp!!.marginStart - movedx
-                lp!!.topMargin = lp!!.topMargin - movedy
+                lp!!.marginStart +=  movedx
+                lp!!.topMargin +=  movedy
                 // 更新悬浮窗控件布局
+                layoutParams = lp
+                return true
             }
             MotionEvent.ACTION_UP -> {
                 val minSlop = 3

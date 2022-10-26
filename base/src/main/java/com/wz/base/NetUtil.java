@@ -1,12 +1,9 @@
 package com.wz.base;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -40,11 +37,19 @@ public class NetUtil {
         return list;
     }
 
-    public static final String LOCATE = "data/local/tmp/layout/";
-    public static final String LOCATE_CONTROL = LOCATE + "s/";
-    public static final String LOCATE_CLIENT = LOCATE + "c/";
-    public static final String LAYOUT_CONTROL = LOCATE_CONTROL + "layout.txt";
-    public static final String LAYOUT_CLIENT = LOCATE_CLIENT + "layout.txt";
+    public static String LOCATE = "";
+    public static final String LOCATE_CONTROL = "s/";
+    public static final String LOCATE_CLIENT = "c/";
+    public static final String LAYOUT_CONTROL = "layout.txt";
+    public static final String LAYOUT_CLIENT = "layout.txt";
+
+    public static String getDefaultControlLayout() {
+        return LOCATE + "/s";
+    }
+
+    public static String getDefaultClientLayout() {
+        return LOCATE + "/c";
+    }
 
 //    public static void checkFile() {
 //        try {

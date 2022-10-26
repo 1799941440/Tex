@@ -7,17 +7,17 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.children
 import com.google.gson.Gson
 import com.wz.base.NetUtil
 import com.wz.base.SkillLayoutConfig
 import com.wz.tex.BitmapUtils
 import com.wz.tex.R
 import com.wz.tex.databinding.LayoutConfigViewBinding
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
+import java.io.*
 
 class ConfigViewActivity : AppCompatActivity() {
 
@@ -39,6 +39,7 @@ class ConfigViewActivity : AppCompatActivity() {
         from = intent?.getIntExtra("from", FROM_CONTROL) ?: FROM_CONTROL
         if (from == FROM_CLIENT) name = "client.jpeg"
         loadTempBg()
+        NetUtil.LOCATE = application.filesDir.path
         loadDefaultConfigFile()
         with(binding.panel) {
             post {
@@ -53,37 +54,78 @@ class ConfigViewActivity : AppCompatActivity() {
         binding.selectBg.setOnClickListener {
             selectImage()
         }
+        binding.add.setOnClickListener {
+            addButton(SkillLayoutConfig.getBlankShow())
+        }
+        binding.save.setOnClickListener {
+            save()
+        }
     }
 
-    private val defaultLayoutFile by lazy {
-        File(if (from == FROM_CONTROL) NetUtil.LAYOUT_CONTROL else NetUtil.LAYOUT_CLIENT)
+    private val defaultLayoutDir by lazy {
+        if (from == FROM_CONTROL)
+            NetUtil.getDefaultControlLayout()
+        else
+            NetUtil.getDefaultClientLayout()
     }
+
+    private val defaultLayoutFileName =
+        if (from == FROM_CONTROL)
+            NetUtil.LAYOUT_CONTROL
+        else
+            NetUtil.LAYOUT_CLIENT
 
     private fun loadDefaultConfigFile() {
-        loadConfigFile(defaultLayoutFile)
+        loadConfigFile(defaultLayoutDir, defaultLayoutFileName)
     }
 
-    private fun loadConfigFile(file: File) {
+    private fun loadConfigFile(dirName: String, fileName: String) {
         binding.panel.removeAllViews()
-        if (!file.exists()) {
-            val mkdirs = file.mkdirs()
+        val dir = File(dirName)
+        if (!dir.exists()) {
+            val mkdirs = dir.mkdirs()
             if (!mkdirs) {
-                Runtime.getRuntime().exec("chmod 777 /data/local/tmp")
+                throw Exception("无法创建目录")
             }
-        } else {
-            val readFileByLines = NetUtil.readFileByLines(file)
-            if (readFileByLines.size > 0) {
-                readFileByLines.forEach {
-                    addButton(gson.fromJson(it, SkillLayoutConfig::class.java))
-                }
+        }
+        val file = File(dir, fileName)
+        if (!file.exists()) {
+            file.createNewFile()
+            writeDefault(file)
+        }
+        val readFileByLines = NetUtil.readFileByLines(file)
+        if (readFileByLines.size > 0) {
+            readFileByLines.forEach {
+                addButton(gson.fromJson(it, SkillLayoutConfig::class.java))
             }
         }
     }
 
+    private fun writeDefault(file: File) {
+        writeFile(file, mutableListOf("{\"index\":1,\"mapType\":1,\"offsetX\":700,\"offsetY\":770,\"orientation\":2,\"width\":100,\"height\":100}"))
+    }
+
+    private fun writeFile(file: File, list: MutableList<String>) {
+        if (list.isEmpty()) return
+        try {
+            val bufferedWriter = BufferedWriter(FileWriter(file, false))
+            list.forEach {
+                bufferedWriter.write(it)
+                bufferedWriter.newLine()
+            }
+            bufferedWriter.flush()
+            bufferedWriter.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private var index: Int = 1
+
     private fun addButton(info: SkillLayoutConfig) {
         val inflate = layoutInflater.inflate(R.layout.item_button, binding.panel, false)
-        inflate.tag = info.index
-        if (inflate is TextView) inflate.text = info.index.toString()
+        inflate.tag = index
+        if (inflate is TextView) inflate.text = index.toString()
         val layoutParams = inflate.layoutParams as ConstraintLayout.LayoutParams
         layoutParams.startToStart = R.id.panel
         layoutParams.topToTop = R.id.panel
@@ -93,6 +135,28 @@ class ConfigViewActivity : AppCompatActivity() {
         layoutParams.topMargin = info.offsetY.toInt()
         inflate.layoutParams = layoutParams
         binding.panel.addView(inflate)
+        index++
+    }
+
+    private fun save() {
+        if (binding.panel.childCount == 0) {
+            Toast.makeText(this, "不能保存空布局", Toast.LENGTH_SHORT).show()
+        }
+        val list = mutableListOf<String>()
+        binding.panel.children.forEach { view ->
+            val layoutParams = view.layoutParams as? ConstraintLayout.LayoutParams
+            layoutParams?.let {
+                list.add(gson.toJson(SkillLayoutConfig.getBlankSave().apply {
+                    index = view.tag as? Int ?: 0
+                    offsetX = layoutParams.marginStart.toFloat()
+                    offsetY = layoutParams.topMargin.toFloat()
+                    width = view.measuredWidth.toFloat()
+                    height = view.measuredHeight.toFloat()
+                }))
+            }
+        }
+        writeFile(File(defaultLayoutDir + File.separator + defaultLayoutFileName), list)
+        Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show()
     }
 
     private fun getScreenResolution(): Int { // 获取屏幕真实分辨率
