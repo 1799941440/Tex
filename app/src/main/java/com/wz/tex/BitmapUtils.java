@@ -32,16 +32,13 @@ public class BitmapUtils {
      * @param bm   picture to save
      */
 
-    public static void saveBitmap(String name, Bitmap bm, Context mContext) {
-        //指定我们想要存储文件的地址
-        String TargetPath = mContext.getFilesDir() + "/images/";
-        Log.d("Save Bitmap", "Save Path=" + TargetPath);
+    public static void saveBitmap(String targetDir, String name, Bitmap bm) {
         //判断指定文件夹的路径是否存在
-        if (!fileIsExist(TargetPath)) {
+        if (!fileIsExist(targetDir)) {
             Log.d("Save Bitmap", "TargetPath isn't exist");
         } else {
             //如果指定文件夹创建成功，那么我们则需要进行图片存储操作
-            File saveFile = new File(TargetPath, name);
+            File saveFile = new File(targetDir, name);
             try {
                 FileOutputStream saveImgOut = new FileOutputStream(saveFile);
                 // compress - 压缩的意思

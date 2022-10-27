@@ -35,10 +35,13 @@ class ConfigSelectDialog : BaseBottomSheetDialogFragment<DialogConfigItemBinding
                 NetUtil.getCConfigFileList()
             }
             else -> arrayOf()
+        }.toMutableList()
+        if (files.size < 5) {
+            for (i in (files.size + 1)..5) {
+                files.add("layout${i}.txt")
+            }
         }
-        if (files.isNotEmpty()) {
-            files.forEach(::addChoices)
-        }
+        files.forEach(::addChoices)
         binding.ok.setOnClickListener {
             clickOK()
         }

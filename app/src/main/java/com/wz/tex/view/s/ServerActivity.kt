@@ -26,6 +26,7 @@ class ServerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         currentFileName = SharedPreferencesHelper.getInstance().getString("lastControlConfig", NetUtil.DEFAULT_CONFIG_NAME)
+        binding.configName.text = currentFileName
         binding.targetConfig.setOnClickListener {
             floatingBind?.sayHello() ?: Toast.makeText(this, "服务未启动", Toast.LENGTH_SHORT).show()
         }
@@ -66,6 +67,7 @@ class ServerActivity : AppCompatActivity() {
                 bindService(Intent(this, ServerWindow::class.java).apply {
                     putExtra("ip", etIp)
                     putExtra("port", etPort.toInt())
+                    putExtra("fileName", currentFileName)
                 }, conn, BIND_AUTO_CREATE)
             }
         } catch (e: Exception) {

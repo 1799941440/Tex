@@ -1,17 +1,19 @@
 package com.wz.tex.view
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
-import androidx.appcompat.widget.AppCompatTextView
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import kotlin.math.abs
 
+@SuppressLint("AppCompatCustomView")
 class MoveTextView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     def: Int = android.R.attr.textViewStyle
-) : AppCompatTextView(context, attrs, def) {
+) : TextView(context, attrs, def) {
 
     private var x = 0
     private var y = 0

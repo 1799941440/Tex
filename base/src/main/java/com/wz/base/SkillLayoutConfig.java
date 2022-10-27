@@ -19,7 +19,7 @@ public class SkillLayoutConfig {
     public static SkillLayoutConfig getBlankShow() {
         SkillLayoutConfig skillLayoutConfig = new SkillLayoutConfig();
         skillLayoutConfig.setMapType(1);
-        skillLayoutConfig.setOrientation(1);
+        skillLayoutConfig.setOrientation(2);
         skillLayoutConfig.setWidth(100);
         skillLayoutConfig.setHeight(100);
         return skillLayoutConfig;
@@ -28,7 +28,7 @@ public class SkillLayoutConfig {
     public static SkillLayoutConfig getBlankSave() {
         SkillLayoutConfig skillLayoutConfig = new SkillLayoutConfig();
         skillLayoutConfig.setMapType(1);
-        skillLayoutConfig.setOrientation(1);
+        skillLayoutConfig.setOrientation(2);
         return skillLayoutConfig;
     }
 

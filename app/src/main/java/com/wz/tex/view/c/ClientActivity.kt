@@ -36,6 +36,7 @@ class ClientActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         currentFileName = SharedPreferencesHelper.getInstance().getString("lastClientConfig", NetUtil.DEFAULT_CONFIG_NAME)
+        binding.configName.text = currentFileName
         binding.myIp.text = BitmapUtils.getIntranetIPAddress(this)
         binding.etPort.setText(mPort.toString())
         binding.refreshIP.setOnClickListener {
@@ -134,7 +135,7 @@ class ClientActivity : AppCompatActivity() {
         try {
             if (isAllowAlertWindow()) {
                 bindService(Intent(this, ClientWindow::class.java).apply {
-                    putExtra("port", mPort)
+                    putExtra("fileName", currentFileName)
                 }, conn, BIND_AUTO_CREATE)
             }
         } catch (e: Exception) {

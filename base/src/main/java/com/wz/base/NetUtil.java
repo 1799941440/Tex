@@ -1,5 +1,10 @@
 package com.wz.base;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -108,6 +113,10 @@ public class NetUtil {
         writeFile(file, Collections.singletonList(content), true);
     }
 
+    public static void writeDefault(File file) {
+        writeFile(file, Collections.singletonList(DEFAULT_CONFIG_CONTENT), false);
+    }
+
     private static void writeFile(File file, List<String> content, boolean isAppend) {
         if (file == null || content == null || content.size() == 0) return;
         try {
@@ -123,34 +132,9 @@ public class NetUtil {
         }
     }
 
-//    public static void checkFile() {
-//        try {
-//            Process p = Runtime.getRuntime().exec("/system/bin/sh");
-//            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()));
-//            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-//            bufferedWriter.write("mkdir -R 777 /data/local/tmp/layout");
-//            bufferedWriter.newLine();
-//            bufferedWriter.close();
-//            String s = bufferedReader.readLine();
-//            while (s != null) {
-//                s = bufferedReader.readLine();
-//                System.out.println(s);
-//            }
-//            p.waitFor();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
     static String[] cmds = {"/system/bin/sh", "CLASSPATH=/data/local/tmp/target", "app_process", "/data/local/temp", "com.wz.target.Client"};
 
-    public static void checkFile() {
-        try {
-            Runtime.getRuntime().exec(cmds).waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
+    @Deprecated
     public static List<String> readFileByLines(String fileName) {
         File file = new File(fileName);
         List<String> result = new ArrayList<>();
@@ -181,6 +165,13 @@ public class NetUtil {
 
     public static List<String> readFileByLines(File file) {
         List<String> result = new ArrayList<>();
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new FileReader(file));
@@ -201,5 +192,22 @@ public class NetUtil {
             }
         }
         return result;
+    }
+
+    public static Bitmap adjustPhotoRotation(Bitmap origin, float alpha) {
+        if (origin == null) {
+            return null;
+        }
+        int width = origin.getWidth();
+        int height = origin.getHeight();
+        Matrix matrix = new Matrix();
+        matrix.setRotate(alpha);
+        // 围绕原地进行旋转
+        Bitmap newBM = Bitmap.createBitmap(origin, 0, 0, width, height, matrix, false);
+        if (newBM.equals(origin)) {
+            return newBM;
+        }
+        origin.recycle();
+        return newBM;
     }
 }

@@ -9,50 +9,27 @@ import android.os.IBinder
 import android.util.Log
 import android.view.*
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+import android.widget.TextView
+import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.gson.Gson
-import com.wz.base.Msg
-import com.wz.tex.BitmapUtils
+import com.wz.base.NetUtil
+import com.wz.base.SkillLayoutConfig
 import com.wz.tex.R
-import com.wz.tex.view.SocketEvents.ACTION_EVENT
-import com.wz.tex.view.SocketEvents.ACTION_HELLO
 import kotlinx.coroutines.*
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.io.PrintWriter
+import java.io.File
 import java.lang.ref.WeakReference
 import java.net.*
-import kotlin.concurrent.thread
-import android.graphics.Point as SPoint
 
 class ClientWindow : Service() {
 
     private var callback: ((Int, String) -> Unit)? = null
     private val windowManager by lazy { getSystemService(WindowManager::class.java) }
-    private lateinit var jSocket: Socket
-    private lateinit var server: ServerSocket
-    private lateinit var view: View
-    private var pw: PrintWriter? = null
     private val gson by lazy { Gson() }
-    private val iconPositions = arrayListOf<Pair<Int, Int>>()
+    private lateinit var view: View
 
     override fun onBind(intent: Intent): IBinder {
-        showFloatWindow()
-        val port = intent.getIntExtra("port", 55555)
-        thread {
-            try {
-                server = ServerSocket(port, 50, InetAddress.getByName(
-                    BitmapUtils.getIntranetIPAddress(this@ClientWindow)
-                ))
-                callback?.invoke(1, "启动成功,等待连接")
-                server.setPerformancePreferences(-1, 10, -1)
-                jSocket = server.accept()
-                callback?.invoke(1, "启动成功,连接成功")
-                pw = PrintWriter(jSocket.getOutputStream())
-                ClientReceive(BufferedReader(InputStreamReader(jSocket.getInputStream())), this).start()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
+        showFloatWindow(intent)
         return FloatingBind(this)
     }
 
@@ -60,12 +37,11 @@ class ClientWindow : Service() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun showFloatWindow() {
+    private fun showFloatWindow(intent: Intent) {
         if (::view.isInitialized) {
             return
         }
         view = View.inflate(this, R.layout.window_float, null)
-
         val layoutParams: WindowManager.LayoutParams = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
@@ -82,36 +58,45 @@ class ClientWindow : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             layoutParams.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         }
-//        val lp = WindowManager.LayoutParams()
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-//        } else {
-//            lp.type = WindowManager.LayoutParams.TYPE_PHONE
-//        }
-//        lp.flags =
-//            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-//                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-//                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-//                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
-//                    WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR or
-//                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
-//        lp.format = PixelFormat.RGBA_8888
-//        lp.gravity = Gravity.END or Gravity.BOTTOM
-//        lp.width = WindowManager.LayoutParams.MATCH_PARENT
-//        lp.height = WindowManager.LayoutParams.MATCH_PARENT
-        val outSize = SPoint()
-        windowManager.defaultDisplay.getRealSize(outSize)
-//        lp.y = (outSize.y * 0.5).toInt()
-        windowManager.addView(view, layoutParams)
-        view.post{
-            val location = IntArray(2)
-            view.getLocationOnScreen(location)
-            println("${location[0]} to ${location[1]}")
-            iconPositions.add(location[0] to location[1])
+        val fileName = intent.getStringExtra("fileName") ?: NetUtil.DEFAULT_CONFIG_NAME
+        val file = File(NetUtil.getDefaultClientLayoutDir(), fileName)
+        if (!file.exists()) {
+            file.createNewFile()
+            NetUtil.writeDefault(file)
         }
+        val readFileByLines = NetUtil.readFileByLines(file)
+        if (readFileByLines.size > 0) {
+            readFileByLines.forEach {
+                try {
+                    addButton(gson.fromJson(it, SkillLayoutConfig::class.java), view as ConstraintLayout)
+                } catch (e: Exception) {
+                    Toast.makeText(this, "配置文件解析失败", Toast.LENGTH_SHORT).show()
+                    e.printStackTrace()
+                }
+            }
+        }
+        windowManager.addView(view, layoutParams)
     }
 
-    inner class FloatingBind(temp: ClientWindow) : Binder() {
+    private var buttonIndex = 1
+
+    private fun addButton(info: SkillLayoutConfig, view: ConstraintLayout) {
+        val inflate = LayoutInflater.from(this).inflate(R.layout.item_button, view, false)
+        inflate.tag = buttonIndex
+        if (inflate is TextView) inflate.text = buttonIndex.toString()
+        val layoutParams = inflate.layoutParams as ConstraintLayout.LayoutParams
+        layoutParams.startToStart = R.id.panel
+        layoutParams.topToTop = R.id.panel
+        layoutParams.width = ((info.width / 9) * 10).toInt()
+        layoutParams.height = ((info.height / 9) * 10).toInt()
+        layoutParams.marginStart = ((info.offsetX / 9) * 10).toInt()
+        layoutParams.topMargin = ((info.offsetY / 9) * 10).toInt()
+        inflate.layoutParams = layoutParams
+        view.addView(inflate)
+        buttonIndex++
+    }
+
+    class FloatingBind(temp: ClientWindow) : Binder() {
 
         val service: WeakReference<ClientWindow>
         init {
@@ -120,21 +105,6 @@ class ClientWindow : Service() {
 
         fun setData(data: String) {
             service.get()?.upData(data)
-        }
-    }
-
-    private fun sendAnswer(ask: String?) {
-        sendToServer(gson.toJson(Msg.generateAnswer(ask)))
-    }
-
-    private fun sendToServer(strToSend: String) {
-        MainScope().launch(Dispatchers.IO) {
-            try {
-                pw?.println(strToSend)
-                pw?.flush()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
         }
     }
 
@@ -150,38 +120,10 @@ class ClientWindow : Service() {
     override fun onUnbind(intent: Intent?): Boolean {
         Log.i(TAG, "onUnbind: ")
         if (::view.isInitialized) windowManager.removeViewImmediate(view)
-        if (::jSocket.isInitialized) jSocket.close()
-        if (::server.isInitialized) server.close()
         callback = null
         return super.onUnbind(intent)
     }
 
-    inner class ClientReceive(private val br: BufferedReader, clientWindow: ClientWindow) : Thread() {
-
-        private val ref: WeakReference<ClientWindow> = WeakReference(clientWindow)
-        private var pointerCount = 0
-        private var lastTouchDown = 0L
-
-        override fun run() {
-            while (!isInterrupted) {
-                try {
-                    if (ref.get() == null) interrupt()
-                    val string = br.readLine()
-                    println("接收 S 的信息$string ${System.currentTimeMillis()}")
-                    if (string.contains(ACTION_EVENT)) {
-
-                    } else if (string.contains(ACTION_HELLO)) {
-                        val fromJson = gson.fromJson(string, Msg::class.java)
-                        ref.get()?.sendAnswer(fromJson.msg)
-                        println(fromJson)
-                    }
-                } catch (s: Exception) {
-                    s.printStackTrace()
-                    interrupt()
-                }
-            }
-        }
-    }
 }
 
 ///dev/input/event4: 0003 0039 00000699 绝对点击 手指id 699

@@ -107,7 +107,7 @@
         app:layout_constraintBottom_toTopOf="@id/panel"
         app:layout_constraintStart_toEndOf="@id/scroller"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="按钮属性:  左边距=16.52%, 上边距=92.58%" />
+        tools:text="layout.txt" />
 
     <LinearLayout
         android:id="@+id/setWH"
