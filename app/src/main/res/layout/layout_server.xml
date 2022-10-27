@@ -26,13 +26,13 @@
         app:layout_constraintTop_toBottomOf="@id/title" />
 
     <EditText
-        android:text="192.168.31.43"
         android:id="@+id/etIp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:digits="1234567890."
         android:hint="目标ip"
         android:minWidth="120dp"
+        android:text="192.168.31.43"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="@id/targetIp"
         app:layout_constraintStart_toEndOf="@id/targetIp"
@@ -88,14 +88,23 @@
         app:layout_constraintStart_toEndOf="@id/targetConfig"
         app:layout_constraintTop_toBottomOf="@id/targetPort" />
 
+    <TextView
+        android:id="@+id/configName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="layout.txt"
+        app:layout_constraintBottom_toBottomOf="@id/serverLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/serverLayout" />
+
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/serverLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="设置布局"
+        android:text="选择布局"
         android:textAllCaps="false"
-        app:layout_constraintStart_toEndOf="@id/stopServer"
-        app:layout_constraintTop_toBottomOf="@id/targetPort" />
+        app:layout_constraintStart_toEndOf="@id/configName"
+        app:layout_constraintTop_toBottomOf="@id/myState" />
 
     <TextView
         android:id="@+id/myState"

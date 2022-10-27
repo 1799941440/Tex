@@ -10,8 +10,11 @@ import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.wz.base.NetUtil
 import com.wz.tex.BitmapUtils
+import com.wz.tex.SharedPreferencesHelper
 import com.wz.tex.databinding.LayoutClientBinding
+import com.wz.tex.view.ConfigSelectDialog
 import com.wz.tex.view.ConfigViewActivity
 import com.wz.tex.view.ConfigViewActivity.Companion.FROM_CLIENT
 import kotlinx.coroutines.Dispatchers
@@ -27,10 +30,12 @@ class ClientActivity : AppCompatActivity() {
     private var floatingBind: ClientWindow.FloatingBind? = null
     private val binding by lazy { LayoutClientBinding.inflate(layoutInflater) }
     private val mPort = 55555
+    private var currentFileName = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        currentFileName = SharedPreferencesHelper.getInstance().getString("lastClientConfig", NetUtil.DEFAULT_CONFIG_NAME)
         binding.myIp.text = BitmapUtils.getIntranetIPAddress(this)
         binding.etPort.setText(mPort.toString())
         binding.refreshIP.setOnClickListener {
@@ -53,10 +58,18 @@ class ClientActivity : AppCompatActivity() {
         binding.closePreview.setOnClickListener {
             stopService()
         }
-        binding.clientLayout.setOnClickListener {
-            startActivity(Intent(this, ConfigViewActivity::class.java).apply {
-                putExtra("from", FROM_CLIENT)
-            })
+        binding.chooseLayout.setOnClickListener {
+            ConfigSelectDialog.newInstance(FROM_CLIENT, currentFileName) { fileName, isEdit ->
+                if (isEdit) {
+                    startActivity(Intent(this, ConfigViewActivity::class.java).apply {
+                        putExtra("from", FROM_CLIENT)
+                        putExtra("fileName", fileName)
+                    })
+                } else {
+                    SharedPreferencesHelper.getInstance().put("lastClientConfig", fileName)
+                    currentFileName = fileName
+                }
+            }.show(supportFragmentManager)
         }
         if (BitmapUtils.saveAssetsToSDCard(this, "target")) {
             Toast.makeText(this, "检测服务状态成功", Toast.LENGTH_SHORT).show()

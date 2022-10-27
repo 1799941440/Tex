@@ -9,17 +9,23 @@ import android.os.IBinder
 import android.provider.Settings
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.wz.base.NetUtil
+import com.wz.tex.SharedPreferencesHelper
 import com.wz.tex.databinding.LayoutServerBinding
+import com.wz.tex.view.ConfigSelectDialog
 import com.wz.tex.view.ConfigViewActivity
+import com.wz.tex.view.ConfigViewActivity.Companion.FROM_CONTROL
 
 class ServerActivity : AppCompatActivity() {
 
     private val binding by lazy { LayoutServerBinding.inflate(layoutInflater) }
     private var floatingBind: ServerWindow.FloatingBind? = null
+    private var currentFileName = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        currentFileName = SharedPreferencesHelper.getInstance().getString("lastControlConfig", NetUtil.DEFAULT_CONFIG_NAME)
         binding.targetConfig.setOnClickListener {
             floatingBind?.sayHello() ?: Toast.makeText(this, "服务未启动", Toast.LENGTH_SHORT).show()
         }
@@ -30,9 +36,17 @@ class ServerActivity : AppCompatActivity() {
             stopService()
         }
         binding.serverLayout.setOnClickListener {
-            startActivity(Intent(this, ConfigViewActivity::class.java).apply {
-                putExtra("from", ConfigViewActivity.FROM_CONTROL)
-            })
+            ConfigSelectDialog.newInstance(FROM_CONTROL, currentFileName) { fileName, isEdit ->
+                if (isEdit) {
+                    startActivity(Intent(this, ConfigViewActivity::class.java).apply {
+                        putExtra("from", FROM_CONTROL)
+                        putExtra("fileName", fileName)
+                    })
+                } else {
+                    SharedPreferencesHelper.getInstance().put("lastClientConfig", fileName)
+                    currentFileName = fileName
+                }
+            }.show(supportFragmentManager)
         }
     }
 

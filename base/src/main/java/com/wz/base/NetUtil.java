@@ -1,14 +1,17 @@
 package com.wz.base;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,17 +41,86 @@ public class NetUtil {
     }
 
     public static String LOCATE = "";
-    public static final String LOCATE_CONTROL = "s/";
-    public static final String LOCATE_CLIENT = "c/";
-    public static final String LAYOUT_CONTROL = "layout.txt";
-    public static final String LAYOUT_CLIENT = "layout.txt";
+    public static final String LOCATE_CONTROL = "/s/";
+    public static final String LOCATE_CLIENT = "/c/";
+    public static final String DEFAULT_CONFIG_NAME = "layout.txt";
+    public static final String DEFAULT_CONFIG_CONTENT = "{\"index\":1,\"mapType\":1,\"offsetX\":0,\"offsetY\":0,\"orientation\":2,\"width\":100,\"height\":100}";
 
-    public static String getDefaultControlLayout() {
-        return LOCATE + "/s";
+    public static String getDefaultControlLayoutDir() {
+        return LOCATE + LOCATE_CONTROL;
     }
 
-    public static String getDefaultClientLayout() {
-        return LOCATE + "/c";
+    public static String getDefaultClientLayoutDir() {
+        return LOCATE + LOCATE_CLIENT;
+    }
+
+    public static String[] getSConfigFileList() throws Exception {
+        File dir = new File(getDefaultControlLayoutDir());
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                throw new Exception("创建ControlLayoutDir失败");
+            }
+        }
+        String[] list = dir.list((file1, s) -> s.endsWith(".txt"));
+        if (list == null || list.length == 0) {
+            File defaultFile = new File(dir, DEFAULT_CONFIG_NAME);
+            if (!defaultFile.createNewFile()) {
+                throw new Exception("创建ControlLayoutDir/layout.txt失败");
+            }
+            coverFile(defaultFile, DEFAULT_CONFIG_CONTENT);
+            return new String[]{ DEFAULT_CONFIG_NAME };
+        }
+        return list;
+    }
+
+    public static String[] getCConfigFileList() throws Exception {
+        File dir = new File(getDefaultClientLayoutDir());
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                throw new Exception("创建ClientLayoutDir失败");
+            }
+        }
+        String[] list = dir.list((file1, s) -> s.endsWith(".txt"));
+        if (list == null || list.length == 0) {
+            File defaultFile = new File(dir, DEFAULT_CONFIG_NAME);
+            if (!defaultFile.createNewFile()) {
+                throw new Exception("创建ClientLayoutDir/layout.txt失败");
+            }
+            coverFile(defaultFile, DEFAULT_CONFIG_CONTENT);
+            return new String[]{ DEFAULT_CONFIG_NAME };
+        }
+        return list;
+    }
+
+    public static void coverFile(File file, List<String> content) {
+        writeFile(file, content, false);
+    }
+
+    public static void appendFile(File file, List<String> content) {
+        writeFile(file, content, true);
+    }
+
+    public static void coverFile(File file, String content) {
+        writeFile(file, Collections.singletonList(content), false);
+    }
+
+    public static void appendFile(File file, String content) {
+        writeFile(file, Collections.singletonList(content), true);
+    }
+
+    private static void writeFile(File file, List<String> content, boolean isAppend) {
+        if (file == null || content == null || content.size() == 0) return;
+        try {
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file, isAppend));
+            for (String str : content) {
+                bufferedWriter.write(str);
+                bufferedWriter.newLine();
+            }
+            bufferedWriter.flush();
+            bufferedWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 //    public static void checkFile() {

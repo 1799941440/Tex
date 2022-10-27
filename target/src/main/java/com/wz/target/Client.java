@@ -1,6 +1,6 @@
 package com.wz.target;
 
-import static com.wz.base.NetUtil.LAYOUT_CLIENT;
+import static com.wz.base.NetUtil.DEFAULT_CONFIG_NAME;
 
 import android.os.SystemClock;
 import android.util.Log;
@@ -77,7 +77,7 @@ public class Client {
 
     private static int offsetX, offsetY;
     private static void readLayoutConfig() {
-        List<String> strings = NetUtil.readFileByLines(LAYOUT_CLIENT);
+        List<String> strings = NetUtil.readFileByLines(DEFAULT_CONFIG_NAME);
         if (strings.size() == 1) {
             SkillLayoutConfig skillLayoutConfig = gson.fromJson(strings.get(0), SkillLayoutConfig.class);
             offsetX = (int) skillLayoutConfig.getOffsetX();

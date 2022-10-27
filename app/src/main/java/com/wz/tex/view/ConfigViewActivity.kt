@@ -25,6 +25,7 @@ class ConfigViewActivity : AppCompatActivity() {
     private val gson by lazy { Gson() }
     private val REQUEST_GET_IMAGE = 1
     private var from = FROM_CONTROL
+    private var fileName: String? = ""
     private var name = "control.jpeg"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,11 +37,15 @@ class ConfigViewActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_FULLSCREEN
                 or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
         setContentView(binding.root)
+        fileName = intent?.getStringExtra("fileName")
+        if (fileName == null) {
+            Toast.makeText(this, "传参fileName丢失", Toast.LENGTH_SHORT).show()
+        }
         from = intent?.getIntExtra("from", FROM_CONTROL) ?: FROM_CONTROL
         if (from == FROM_CLIENT) name = "client.jpeg"
         loadTempBg()
         NetUtil.LOCATE = application.filesDir.path
-        loadDefaultConfigFile()
+        loadConfigFile()
         with(binding.panel) {
             post {
                 val widthPixels = resources.displayMetrics.widthPixels
@@ -64,19 +69,13 @@ class ConfigViewActivity : AppCompatActivity() {
 
     private val defaultLayoutDir by lazy {
         if (from == FROM_CONTROL)
-            NetUtil.getDefaultControlLayout()
+            NetUtil.getDefaultControlLayoutDir()
         else
-            NetUtil.getDefaultClientLayout()
+            NetUtil.getDefaultClientLayoutDir()
     }
 
-    private val defaultLayoutFileName =
-        if (from == FROM_CONTROL)
-            NetUtil.LAYOUT_CONTROL
-        else
-            NetUtil.LAYOUT_CLIENT
-
-    private fun loadDefaultConfigFile() {
-        loadConfigFile(defaultLayoutDir, defaultLayoutFileName)
+    private fun loadConfigFile() {
+        loadConfigFile(defaultLayoutDir, fileName!!)
     }
 
     private fun loadConfigFile(dirName: String, fileName: String) {
@@ -102,22 +101,7 @@ class ConfigViewActivity : AppCompatActivity() {
     }
 
     private fun writeDefault(file: File) {
-        writeFile(file, mutableListOf("{\"index\":1,\"mapType\":1,\"offsetX\":700,\"offsetY\":770,\"orientation\":2,\"width\":100,\"height\":100}"))
-    }
-
-    private fun writeFile(file: File, list: MutableList<String>) {
-        if (list.isEmpty()) return
-        try {
-            val bufferedWriter = BufferedWriter(FileWriter(file, false))
-            list.forEach {
-                bufferedWriter.write(it)
-                bufferedWriter.newLine()
-            }
-            bufferedWriter.flush()
-            bufferedWriter.close()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        NetUtil.coverFile(file, NetUtil.DEFAULT_CONFIG_CONTENT)
     }
 
     private var index: Int = 1
@@ -155,7 +139,7 @@ class ConfigViewActivity : AppCompatActivity() {
                 }))
             }
         }
-        writeFile(File(defaultLayoutDir + File.separator + defaultLayoutFileName), list)
+        NetUtil.coverFile(File(defaultLayoutDir + NetUtil.DEFAULT_CONFIG_NAME), list)
         Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show()
     }
 
